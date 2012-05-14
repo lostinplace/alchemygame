@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <style>
+    
+    *
+    {
+      padding:0px;
+      margin: 0px;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      
+    }
+    .game-draggable{
+    
+    }
+    
+    
+    .game-draggable *
+    {
+      cursor: move;
+    }
+    
+    .sourceframe
+    {
+      display:inline-block;
+      position:relative;
+      
+    }
+    
+    .sourceFrame *
+    {
+    }
+    
+    .sourceframe .framelabel{
+      position:absolute;
+      top:45%;
+      margin-left:45%;
+    }
+    
+    .boxy
+    {
+      outline-color:Black;
+      outline-style:solid;
+      outline-width:1px;
+    }
+    
+    
+    .framelabel>span
+    {
+      font-family:Verdana; 
+      font-size:40px;
+      font-weight:bolder; 
+      color: #DEDEDE;
+      display:block;
+    }
+    .bigtext
+    {
+      font-family:Verdana; 
+      font-size:40px;
+      font-weight:bolder; 
+    }
+    
+  </style>
+    <title></title>
+    <script id="jQuery" src ="http://code.jquery.com/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      
+      function getOffset(el) {
+        var contentOffset = getContentOffset(el);
+        var elStyle = getComputedStyle(el);
+        var parentStyle;
+        do {
+          parentStyle = el.offsetParent ? getComputedStyle(el.offsetParent) : { borderLeftWidth: 0, borderTopWidth: 0 };
+          contentOffset.x += el.offsetLeft + parseInt(parentStyle.borderLeftWidth, 10) - el.scrollLeft;
+          contentOffset.y += el.offsetTop + parseInt(parentStyle.borderTopWidth, 10) - el.scrollTop;
+        }while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop) && (el=el.offsetParent))
+        
+        return { top: contentOffset.y, left: contentOffset.x };
+      }
+
+      function getContentOffset(el) {
+        var elStyle = getComputedStyle(el);
+        var _x = Math.round(-parseFloat(elStyle.marginLeft, 10) || 0 - parseFloat(elStyle.borderLeft, 10) || 0)
+            - (document.documentElement.scrollLeft || document.body.scrollLeft);
+        var _y = Math.round(-parseFloat(elStyle.marginTop, 10) || 0 - parseFloat(elStyle.borderTop, 10) || 0)
+            - (document.documentElement.scrollTop || document.body.scrollTop);
+        return { x: _x, y: _y };
+      }
+
+      var movingElement;
+      var mouseDownOffset = { x: 0, y: 0 };
+      var $placeHolder;
+      
+      function handleMove(e) {
+        if (movingElement) {
+          var contentOffset = getContentOffset(movingElement);
+          $(movingElement).css({
+            left: e.pageX - mouseDownOffset.offsetX + contentOffset.x,
+            top: e.pageY - mouseDownOffset.offsetY + contentOffset.y
+          });
+        }
+      }
+
+      function handleDragOver(e) {
+        if (movingElement) {
+          var elStyle = getComputedStyle(movingElement);
+          var dropTargetElOffset = getContentOffset(this);
+          var movingElementOffset = getContentOffset(movingElement);
+          var cloneStyle = {
+            margin: elStyle.margin,
+            'margin-left': elStyle.marginLeft,
+            'margin-right': elStyle.marginRight,
+            'margin-top': elStyle.marginTop,
+            'margin-bottom': elStyle.marginBottom,
+            border: elStyle.border,
+            width: elStyle.width,
+            height: elStyle.height,
+            top: -(movingElementOffset.y-dropTargetElOffset.y),
+            left: -(movingElementOffset.x-dropTargetElOffset.x),
+            'background-color':'blue',
+            opacity:0.25
+          }
+          $placeHolder = $placeHolder||$('<div />');
+          $placeHolder.css(cloneStyle).appendTo($(this));
+        }
+      }
+
+      function handleDragStart(e) {
+        var $this = $(this);
+        //var $draggable=$this.closest('game-draggable')
+        var $this_offset = (this === movingElement) ? {
+            top:$this.css('top'),
+            left: $this.css('left')
+          }: getOffset(this);
+        $this.css({ position: 'fixed', top: $this_offset.top, left: $this_offset.left,color:'red' });
+        movingElement = this;
+        mouseDownOffset = { offsetX: e.offsetX, offsetY: e.offsetY };
+      }
+
+      $('.game-droptarget').live('mouseover', handleDragOver);
+      $('.game-draggable').live('mousedown', handleDragStart);
+      $('html').live('mousemove', handleMove);
+
+    </script>
+    
+</head>
+<body >
+  <div style="height:600px; width:600px; "class="boxy">
+    <div class="sourceframe boxy game-droptarget" dropzone="true" style="display:inline-block; vertical-align:top; outline-color:red; height:100%; width:50%" >
+      <div class="framelabel" ><span style=" ">A</span></div>
+    </div><div style="display:inline-block; height:100% ;width:50%; position:relative" class="boxy" >
+      <div class="sourceframe boxy" style="display:block; outline-color:blue; height:50%">
+        <div class="framelabel" ><span >B</span></div>
+        <div style="margin:40px;">
+          <div id="piece1" class="boxy game-draggable " style="outline-color:invert; margin-left:25px; margin-top:25px; display:inline-block">
+            <div><span class="bigtext"> 1 </span></div>
+          </div>
+        </div>
+      </div><div class="sourceframe boxy" style="display:block; outline-color:green;height:50%" >
+        <div class="framelabel"  ><span >C</span></div>
+      </div></div>
+</div>  
+</body>
+</html>
